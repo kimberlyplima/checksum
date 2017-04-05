@@ -1,7 +1,8 @@
 	clc
     clear all
 
-    diretorio = strcat('/Users/macbookpro/Documents/MATLAB/BitsComChecksum.bin');
+    [FileName, PatchName] = uigetfile('*', 'Selecione o arquivo');
+    diretorio = strcat(PatchName, FileName);
 
     IDarquivo = fopen(diretorio);
     BitsComChecksum = uint8(fread(IDarquivo, [1, inf], 'ubit1'));
