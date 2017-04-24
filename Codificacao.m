@@ -66,14 +66,6 @@
             end
         end
         
-        k = 1;
-        
-        for j = Tam+1:Tam+4
-            Conteudoarquivo(j) = Checksum(k);
-            k = k+1;
-        end
-        
-    Tam = length(Conteudoarquivo);    
     end
     
     Conteudoarquivo
