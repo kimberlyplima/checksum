@@ -7,16 +7,18 @@
     IDarquivo = fopen(diretorio); % Abre o arquivo a ser cifrado e atribui a IDarquivo
     Conteudoarquivo = uint8(fread(IDarquivo, [1, inf], 'ubit1')); % Le o conteudo, bit a bit, do arquivo selecionado
     Tam = length(Conteudoarquivo); % Le o tamanho do arquivo e salva na variavel Tam
+    TamOriginal = Tam;
 
 
     Conteudoarquivo   
     
     Checksum = zeros(1,4);
     Carry = 0;
-    Var_soma = 0; 
-
-    for i = 1:8:Tam
+    Var_soma = 0;
+    VetorTemporario = Conteudoarquivo;
     
+    for i = 1:8:Tam
+        
         Checksum(4) = xor(Conteudoarquivo(i+3), Conteudoarquivo(i+7));
         Opand = and(Conteudoarquivo(i+3), Conteudoarquivo(i+7));
         if (Opand == 1)
@@ -66,9 +68,13 @@
             end
         end
         
+        Conteudoarquivo(Tam+1) = Checksum(1);
+        Conteudoarquivo(Tam+2) = Checksum(2);
+        Conteudoarquivo(Tam+3) = Checksum(3);
+        Conteudoarquivo(Tam+4) = Checksum(4);
+        
+        Tam = length(Conteudoarquivo);
     end
-    
-    Conteudoarquivo
     
     % Salvar conteudo no arquivo 'BitsComChecksum':
 	Filecodif = fopen('BitsComChecksum.bin', 'wb');
