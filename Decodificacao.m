@@ -6,14 +6,18 @@
 
     IDarquivo = fopen(diretorio);
     BitsCorrompidosComChecksum = uint8(fread(IDarquivo, [1, inf], 'ubit1'));
-    Tam = length(BitsCorrompidosComChecksum);
+    TamComChecksum = length(BitsCorrompidosComChecksum);
+    Tam = BitsCorrompidosComChecksum(TamComChecksum);
+
 
     Checksum = zeros(1,4);
     Carry = 0;
     Var_soma = 0;
+    PosicaoAtual = 0;
+    VetorChecksum = [];
 
     for i = 1:8:Tam
-    
+        
         Checksum(4) = xor(BitsCorrompidosComChecksum(i+3), BitsCorrompidosComChecksum(i+7));
         Opand = and(BitsCorrompidosComChecksum(i+3), BitsCorrompidosComChecksum(i+7));
         if (Opand == 1)
@@ -62,4 +66,13 @@
                 Checksum(4) = 0;
             end
         end
+
+        VetorChecksum(i) = Checksum(1);
+        VetorChecksum(i+1) = Checksum(2);
+        VetorChecksum(i+2) = Checksum(3);
+        VetorChecksum(i+3) = Checksum(4);
     end
+    
+        BitsCorrompidosComChecksum
+        
+        

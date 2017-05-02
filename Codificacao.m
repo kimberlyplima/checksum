@@ -8,14 +8,10 @@
     Conteudoarquivo = uint8(fread(IDarquivo, [1, inf], 'ubit1')); % Le o conteudo, bit a bit, do arquivo selecionado
     Tam = length(Conteudoarquivo); % Le o tamanho do arquivo e salva na variavel Tam
     TamOriginal = Tam;
-
-
-    Conteudoarquivo   
     
     Checksum = zeros(1,4);
     Carry = 0;
     Var_soma = 0;
-    VetorTemporario = Conteudoarquivo;
     
     for i = 1:8:Tam
         
@@ -68,13 +64,17 @@
             end
         end
         
-        Conteudoarquivo(Tam+1) = Checksum(1);
-        Conteudoarquivo(Tam+2) = Checksum(2);
-        Conteudoarquivo(Tam+3) = Checksum(3);
-        Conteudoarquivo(Tam+4) = Checksum(4);
-        
+        Contador = 1;
+
+        for j = Tam+1:Tam+4
+            Conteudoarquivo(j) = Checksum (Contador);
+            Contador = Contador+1;
+        end
+
         Tam = length(Conteudoarquivo);
     end
+
+    Conteudoarquivo(Tam+1) = TamOriginal;
     
     % Salvar conteudo no arquivo 'BitsComChecksum':
 	Filecodif = fopen('BitsComChecksum.bin', 'wb');
