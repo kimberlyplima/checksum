@@ -6,11 +6,10 @@
 
     IDarquivo = fopen(diretorio);
     BitsComChecksum = uint8(fread(IDarquivo, [1, inf], 'ubit1'));
-    TamComChecksum = length(BitsComChecksum);
-    Tam = BitsComChecksum(TamComChecksum);
+    Tam = length(BitsComChecksum);
     
     for i = 1:32:Tam
-    	BitAcomrromper = round((31*rand(1,1)+1)) 
+    	BitAcomrromper = round((Tam*rand(1,1))) 
 
 		if BitsComChecksum(BitAcomrromper) == 0
 			BitsComChecksum(BitAcomrromper) = 1;
