@@ -1,26 +1,40 @@
-    clc % Limpa os comandos
-    clear all % Limpa a memoria
+	clc
+    clear all
 
     [FileName, PatchName] = uigetfile('*', 'Selecione o arquivo');
     diretorio = strcat(PatchName, FileName);
 
-    IDarquivo = fopen(diretorio); % Abre o arquivo a ser cifrado e atribui a IDarquivo
-    BitsCorrompidosComChecksum = uint8(fread(IDarquivo, [1, inf], 'ubit1')); % Le o conteudo, bit a bit, do arquivo selecionado
-    Tam = length(BitsCorrompidosComChecksum); % Le o tamanho do arquivo e salva na variavel Tam
-    
+    IDarquivo = fopen(diretorio);
+    BitsCorrompidosComChecksum = uint8(fread(IDarquivo, [1, inf], 'ubit1'));
+    Tam = length(BitsCorrompidosComChecksum);
+
     Checksum = zeros(1,4);
-    VetorTemporario = BitsCorrompidosComChecksum;
+    VetorTemporario = cell(0);
     Carry = 0;
     Var_soma = 0;
-    
-    for i = 1:8:Tam
 
-        if (i > 1)
-            for j = i:i+7
-                VetorTemporario(j+4) = BitsCorrompidosComChecksum(j);
-            end            
-        end
+    for p = 7:-1:0
+        x = (Tam - p)/12;
         
+        if (round(x) == x)
+            Contador = 8*x;
+            Padding = p;
+            BitsCorrompidosComChecksum = not(BitsCorrompidosComChecksum(1:Tam-p));
+            break
+        end
+    end
+
+    BitsCorrompidosComChecksum
+    
+    for i = 1:12:Contador
+
+        if (i == 1)
+            VetorTemporario = BitsCorrompidosComChecksum(i:i+7);
+        else
+            VetorTemporario = cat(2,VetorTemporario,BitsCorrompidosComChecksum(i:i+7));
+        end
+
+
         Checksum(4) = xor(BitsCorrompidosComChecksum(i+3), BitsCorrompidosComChecksum(i+7));
         Opand = and(BitsCorrompidosComChecksum(i+3), BitsCorrompidosComChecksum(i+7));
         if (Opand == 1)
@@ -50,7 +64,7 @@
             Carry = 0;
             Var_soma = 0;
         end
-
+        
         Checksum(1) = xor(BitsCorrompidosComChecksum(i), BitsCorrompidosComChecksum(i+4));
         Checksum(1) = xor(Checksum(1), Carry);
         Var_soma = (BitsCorrompidosComChecksum(i) + BitsCorrompidosComChecksum(i+4) + Carry);
@@ -62,28 +76,54 @@
             Var_soma = 0;
         end
         
-        if (Carry == 1)
+        while (Carry == 1)
             if (Checksum(4) == 0)
                 Checksum(4) = 1;
+                Carry = 0;
             else
                 Checksum(4) = 0;
+                Carry = 1;
+                
+                if (Checksum(3) == 0)
+                    Checksum(3) = 1;
+                    Carry = 0;
+                else
+                    Checksum(3) = 0;
+                    Carry = 1;
+                    
+                    if (Checksum(2) == 0)
+                        Checksum(2) = 1;
+                        Carry = 0;
+                    else
+                        Checksum(2) = 0;
+                        Carry = 1;
+                        
+                        if (Checksum(1) == 0)
+                            Checksum(1) = 1;
+                            Carry = 0;
+                        else
+                            Checksum(1) = 0;
+                            Carry = 1;
+                        end
+                    end
+                end
             end
         end
 
-        if (i > 1)
-            i = i + 4;
-        end
-        
-        VetorTemporario(i+8) = Checksum(1);
-        VetorTemporario(i+9) = Checksum(2);
-        VetorTemporario(i+10) = Checksum(3);
-        VetorTemporario(i+11) = Checksum(4);
+        VetorTemporario = cat(2, VetorTemporario, Checksum);
     end
-        
-    [FileName, PatchName] = uigetfile('*', 'Selecione o arquivo');
-    diretorio = strcat(PatchName, FileName);
-
-    IDarquivo = fopen(diretorio); 
-    BitsComChecksum = uint8(fread(IDarquivo, [1, inf], 'ubit1'));
     
-    Validacao = logical(sum(BitsCorrompidosComChecksum, BitsComChecksum));
+if (Padding ~= 0)
+    if (Padding > 1)
+        Padding = zeros(1,Padding);
+        VetorTemporario = cat(2,VetorTemporario,Padding);
+    else
+        VetorTemporario = cat(2,VetorTemporario,Padding);
+    end
+end
+
+VetorTemporario
+
+BitsCorrompidos = numel(find(xor(BitsCorrompidosComChecksum, VetorTemporario) == 1));
+BitsCorrompidos
+        

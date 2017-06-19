@@ -7,17 +7,34 @@
     IDarquivo = fopen(diretorio);
     BitsComChecksum = uint8(fread(IDarquivo, [1, inf], 'ubit1'));
     Tam = length(BitsComChecksum);
-    
-    for i = 1:32:Tam
-    	BitAcomrromper = round((Tam*rand(1,1))) 
 
-		if BitsComChecksum(BitAcomrromper) == 0
-			BitsComChecksum(BitAcomrromper) = 1;
-		else
-			BitsComChecksum(BitAcomrromper) = 0;
+    for p = 7:-1:0
+        x = (Tam - p)/12;
+        
+        if (round(x) == x)
+            Contador = 8*x;
+            break
+        end
+    end
+
+    BitsCorrompidos = 0;
+    
+    for i = 1:32:Contador
+    	BitACorromper = randi(i+31);
+        
+        while (BitACorromper > Contador)
+            BitACorromper = randi(i+31);
+        end
+
+		if (rand(1) <= 0.5)
+            BitsCorrompidos = BitsCorrompidos+1;
+			BitsComChecksum(BitACorromper) = not(BitsComChecksum(BitACorromper));
 		end
-	end
+    end
+    
+    BitsCorrompidos
 
 	Filecodif = fopen('BitsCorrompidosComChecksum.bin', 'wb');
 	fwrite(Filecodif, BitsComChecksum, 'ubit1');
+	fclose(Filecodif);
 

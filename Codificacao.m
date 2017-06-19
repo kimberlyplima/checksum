@@ -9,16 +9,15 @@
     Tam = length(Conteudoarquivo); % Le o tamanho do arquivo e salva na variavel Tam
     
     Checksum = zeros(1,4);
-    VetorTemporario = Conteudoarquivo;
+    VetorTemporario = cell(0);
     Carry = 0;
     Var_soma = 0;
     
     for i = 1:8:Tam
-
-        if (i > 1)
-            for j = i:i+7
-                VetorTemporario(j+4) = Conteudoarquivo(j);
-            end            
+        if (i == 1)
+            VetorTemporario = Conteudoarquivo(i:i+7);
+        else
+            VetorTemporario = cat(2,VetorTemporario,Conteudoarquivo(i:i+7));
         end
         
         Checksum(4) = xor(Conteudoarquivo(i+3), Conteudoarquivo(i+7));
@@ -62,27 +61,46 @@
             Var_soma = 0;
         end
         
-        if (Carry == 1)
+        while (Carry == 1)
             if (Checksum(4) == 0)
                 Checksum(4) = 1;
+                Carry = 0;
             else
                 Checksum(4) = 0;
+                Carry = 1;
+                
+                if (Checksum(3) == 0)
+                    Checksum(3) = 1;
+                    Carry = 0;
+                else
+                    Checksum(3) = 0;
+                    Carry = 1;
+                    
+                    if (Checksum(2) == 0)
+                        Checksum(2) = 1;
+                        Carry = 0;
+                    else
+                        Checksum(2) = 0;
+                        Carry = 1;
+                        
+                        if (Checksum(1) == 0)
+                            Checksum(1) = 1;
+                            Carry = 0;
+                        else
+                            Checksum(1) = 0;
+                            Carry = 1;
+                        end
+                    end
+                end
             end
         end
-
-        if (i > 1)
-            i = i + 4;
-        end
         
-        VetorTemporario(i+8) = Checksum(1);
-        VetorTemporario(i+9) = Checksum(2);
-        VetorTemporario(i+10) = Checksum(3);
-        VetorTemporario(i+11) = Checksum(4);
+        VetorTemporario = cat(2, VetorTemporario, Checksum);
     end
 
         Conteudoarquivo = not(VetorTemporario);
-        Conteudoarquivo
     
     % Salvar conteudo no arquivo 'BitsComChecksum':
 	Filecodif = fopen('BitsComChecksum.bin', 'wb');
 	fwrite(Filecodif, Conteudoarquivo, 'ubit1');
+    fclose(Filecodif);
